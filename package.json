@@ -1,0 +1,51 @@
+{
+  "name": "@arcus-xyz/arcus-spot-sdk",
+  "version": "1.0.2",
+  "description": "TypeScript SDK for the Arcus spot router server.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arcus-xyz/arcus-spot-sdk.git"
+  },
+  "homepage": "https://github.com/arcus-xyz/arcus-spot-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/arcus-xyz/arcus-spot-sdk/issues"
+  },
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p examples/demo/tsconfig.json",
+    "test": "bun test",
+    "demo": "vite examples/demo --host 127.0.0.1",
+    "demo:build": "vite build examples/demo",
+    "logs:lookup": "bun examples/logs-lookup.ts",
+    "prettify": "prettier --write \"src/**/*.{ts,json}\" \"examples/**/*.{ts,json,css,md}\" \"*.{json,md}\"",
+    "prettify:check": "prettier --check \"src/**/*.{ts,json}\" \"examples/**/*.{ts,json,css,md}\" \"*.{json,md}\"",
+    "prepublishOnly": "bun run build"
+  },
+  "peerDependencies": {
+    "viem": "^2.49.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3",
+    "viem": "^2.51.3",
+    "vite": "^5.4.21"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // The demo is bundled by Vite and imports the SDK by relative source path,
+    // so it uses Bundler resolution (extensionless imports) rather than the
+    // package's NodeNext build resolution.
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["vite/client"],
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts"]
+}

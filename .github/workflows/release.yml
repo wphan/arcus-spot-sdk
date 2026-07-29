@@ -1,0 +1,100 @@
+name: Release
+
+# Publishes @arcus-xyz/arcus-spot-sdk to the public npm registry using npm
+# trusted publishing (OIDC) — no long-lived NPM token required. Triggered by a
+# published GitHub Release, or manually via workflow_dispatch. The release tag
+# must resolve to the version in package.json.
+#
+# Prerequisites (one-time, on npmjs.com):
+#   1. The package must already exist on npm (OIDC cannot do the FIRST publish of
+#      a brand-new package — do the initial publish manually, see README).
+#   2. Configure a Trusted Publisher on the package: Settings → Trusted Publisher
+#      → GitHub Actions, with owner=arcus-xyz, repo=arcus-spot-sdk,
+#      workflow filename=release.yml (and environment=release if you enable the
+#      GitHub environment below).
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required for npm trusted publishing (OIDC)
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1"
+
+      - name: Setup Node.js for npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing (OIDC) requires npm >= 11.5.1. Node 24 ships a recent
+      # npm, but pin to latest so the requirement holds regardless of the runner.
+      - name: Ensure npm supports trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - name: Verify release tag matches package.json version
+        if: github.event_name == 'release'
+        run: |
+          set -euo pipefail
+          RAW="${GITHUB_REF_NAME}"
+          VER="$RAW"
+          VER="${VER#@arcus-xyz/arcus-spot-sdk@}"
+          VER="${VER#arcus-spot-sdk@}"
+          VER="${VER#sdk-v}"
+          VER="${VER#sdk-}"
+          VER="${VER#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          echo "Release tag:          $RAW (=> $VER)"
+          echo "package.json version: $PKG_VERSION"
+          if [ "$VER" != "$PKG_VERSION" ]; then
+            echo "::error::Release tag '$RAW' (resolved '$VER') does not match package.json version '$PKG_VERSION'"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Build
+        run: bun run build
+
+      # No NODE_AUTH_TOKEN: npm exchanges the GitHub OIDC token for a short-lived
+      # publish credential and attaches provenance automatically.
+      - name: Publish to npm (OIDC)
+        run: npm publish --access public --ignore-scripts
+
+      - name: Summary
+        if: success()
+        run: |
+          {
+            echo "## Published @arcus-xyz/arcus-spot-sdk@$(node -p "require('./package.json').version")"
+            echo ""
+            echo "- Registry: https://registry.npmjs.org"
+            echo "- Package: https://www.npmjs.com/package/@arcus-xyz/arcus-spot-sdk"
+            echo "- Auth: npm trusted publishing (OIDC)"
+          } >> "$GITHUB_STEP_SUMMARY"
