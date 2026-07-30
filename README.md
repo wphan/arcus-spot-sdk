@@ -13,11 +13,22 @@ npm install @arcus-xyz/arcus-spot-sdk viem
 # or: bun add @arcus-xyz/arcus-spot-sdk viem
 ```
 
+## Hosted routers
+
+Public router deployments are available — no local setup or API key is needed to fetch quotes:
+
+| Environment       | Base URL                                   | Chain ID | Venues              |
+| ----------------- | ------------------------------------------ | -------- | ------------------- |
+| Robinhood mainnet | `https://router.spot.arcus.xyz/v1`         | 4663     | arcus, rialto, lifi |
+| Robinhood testnet | `https://router.spot.testnet.arcus.xyz/v1` | 46630    | arcus               |
+
+Verify either with the unversioned health endpoint, e.g. `curl https://router.spot.arcus.xyz/health` → `{"ok":true,"chainId":4663,...}`. Self-hosted routers (e.g. `http://localhost:8787/v1`) work the same way — every example below accepts either base URL.
+
 ## Usage
 
 ### Robinhood testnet (Arcus)
 
-Point the client at a router running with `CHAIN_ID=46630`. The wallet must be on chain **46630**. Default mock trade pair: **mUSDG → mTSLA** (fetch token addresses via [`getTokenList()`](#chain-deployments-and-token-list) below).
+Point the client at a router serving chain **46630** — the hosted testnet router above, or a locally-run router (`http://localhost:8787/v1`). The wallet must be on chain **46630**. Default mock trade pair: **mUSDG → mTSLA** (fetch token addresses via [`getTokenList()`](#chain-deployments-and-token-list) below).
 
 ```ts
 import {
@@ -31,7 +42,7 @@ import {
 } from "@arcus-xyz/arcus-spot-sdk";
 import { createPublicClient, createWalletClient, custom, http } from "viem";
 
-const client = new SpotRouterClient({ baseUrl: "http://localhost:8787/v1" });
+const client = new SpotRouterClient({ baseUrl: "https://router.spot.testnet.arcus.xyz/v1" });
 const publicClient = createPublicClient({
   chain: { id: ROBINHOOD_TESTNET_CHAIN_ID, name: "robinhood-testnet" },
   transport: http("https://rpc.testnet.chain.robinhood.com"),
@@ -108,7 +119,7 @@ Example `quote.fees` from a firm quote:
 
 ## Chain deployments and token list
 
-Onchain addresses are bundled per chain (mirroring the [router contracts README](https://github.com/arcus-xyz/v5-spot-router/blob/main/contracts/README.md)):
+Onchain addresses are bundled per chain (published with ABIs in [`arcus-xyz/spot-contracts-abis`](https://github.com/arcus-xyz/spot-contracts-abis)):
 
 ```ts
 import {
@@ -125,7 +136,7 @@ const deployments = getChainDeployments(ROBINHOOD_TESTNET_CHAIN_ID);
 
 getSwapShellAddress(46630); // => ROBINHOOD_TESTNET_DEPLOYMENTS.swapShell
 
-const client = new SpotRouterClient({ baseUrl: "http://localhost:8787/v1" });
+const client = new SpotRouterClient({ baseUrl: "https://router.spot.arcus.xyz/v1" });
 const tokens = await client.getTokenList();
 // [{ chainId, symbol, name, address, decimals, source, wrappedTokenAddress? }, ...]
 ```
@@ -176,7 +187,7 @@ Pass the `WrappedTokenFactory` proxy and `WrappedToken` beacon for your deployme
 
 ![Demo UI showing aggregate quote selection, signing, submission, and status panels](./docs/assets/demo-screenshot.png)
 
-Run the [router](https://github.com/arcus-xyz/v5-spot-router) with API keys, then start the demo with:
+The demo ships presets for the [hosted routers](#hosted-routers), so no router setup is required. Start it with:
 
 ```bash
 bun install
@@ -185,7 +196,7 @@ bun run demo
 
 Open http://127.0.0.1:5173, connect an injected wallet, fetch firm quotes, choose one, sign, submit, and poll status.
 
-For Robinhood testnet: select the **local** router preset (sets chain ID to **46630** and fills the testnet SwapShell address), connect a wallet on RH testnet, and trade **mUSDG → mTSLA** with the `arcus` venue.
+For Robinhood testnet: select the **testnet** router preset (sets chain ID to **46630** and fills the testnet SwapShell address), connect a wallet on RH testnet, and trade **mUSDG → mTSLA** with the `arcus` venue. The **local** preset (`http://localhost:8787/v1`) remains for self-hosted routers.
 
 ## Develop
 

@@ -86,9 +86,9 @@ const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw new Error("Missing #app");
 
 const ROUTER_BASE_URLS = {
-  testnet: "https://router-testnet.v5-spot-testing.com/v1",
+  testnet: "https://router.spot.testnet.arcus.xyz/v1",
   arbitrum: "https://router-arbitrum.v5-spot-testing.com/v1",
-  rhMainnet: "https://router-rh-mainnet.v5-spot-testing.com/v1",
+  rhMainnet: "https://router.spot.arcus.xyz/v1",
   local: "http://localhost:8787/v1",
   custom: "custom",
 } as const;

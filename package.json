@@ -1,6 +1,6 @@
 {
   "name": "@arcus-xyz/arcus-spot-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Browser TypeScript SDK for the Arcus / dYdX v5 spot router server.",
   "type": "module",
   "sideEffects": false,
