@@ -4,6 +4,8 @@ TypeScript SDK for the Arcus spot router server. It wraps the router HTTP API an
 
 `viem` is the only runtime dependency (a peer dependency); the SDK ships no other runtime deps.
 
+> **Go SDK:** this repo also ships a Go port with the same API surface in [`go/`](./go/README.md) — `go get github.com/arcus-xyz/arcus-spot-sdk/go`.
+
 ## Install
 
 Published to the public npm registry — no registry configuration or token required:
