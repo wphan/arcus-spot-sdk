@@ -1,0 +1,108 @@
+name: Release Go SDK
+
+# Go modules are "published" by pushing a version tag: consumers and
+# proxy.golang.org fetch module source straight from the git repo, so there is
+# no registry upload step and no publish credential. Because the module lives in
+# the go/ subdirectory, its tags carry the directory prefix: go/vX.Y.Z.
+#
+# To cut a release:
+#   git tag go/v1.0.0
+#   git push arcus go/v1.0.0
+#
+# This workflow validates the tagged module (build, vet, tests, tag/version
+# sanity) and then requests it from proxy.golang.org so the version is indexed
+# and immediately `go get`-able. A failed run does not "unpublish" the tag —
+# fix forward with a new version instead of moving tags.
+
+on:
+  push:
+    tags:
+      - "go/v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-go-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  MODULE_PATH: github.com/arcus-xyz/arcus-spot-sdk/go
+
+jobs:
+  validate:
+    name: Validate tagged module
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: go
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+          cache-dependency-path: go/go.sum
+
+      - name: Verify tag is a valid module version
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#go/}"
+          echo "Release tag: ${GITHUB_REF_NAME} (module version ${VERSION})"
+          if ! echo "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::Tag '${GITHUB_REF_NAME}' does not resolve to a semver module version (expected go/vX.Y.Z)"
+            exit 1
+          fi
+          # v2+ module versions require a matching /vN suffix on the module path.
+          MAJOR="${VERSION%%.*}"
+          if [ "$MAJOR" != "v0" ] && [ "$MAJOR" != "v1" ]; then
+            if ! grep -q "^module ${MODULE_PATH}/${MAJOR}$" go.mod; then
+              echo "::error::${VERSION} requires 'module ${MODULE_PATH}/${MAJOR}' in go/go.mod (Go semantic import versioning)"
+              exit 1
+            fi
+          fi
+
+      - run: go vet ./...
+      - run: go build ./...
+      - run: go test ./...
+
+  publish:
+    name: Index on proxy.golang.org
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+
+      # Requesting the version from the public module proxy makes it fetch the
+      # tag from GitHub, record it in the checksum database (sum.golang.org),
+      # and list it on pkg.go.dev. Retry briefly: the proxy may see the tag a
+      # few seconds after the workflow starts.
+      - name: Request module from proxy.golang.org
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#go/}"
+          export GOPROXY=https://proxy.golang.org
+          for attempt in 1 2 3 4 5; do
+            if go list -m "${MODULE_PATH}@${VERSION}"; then
+              echo "Indexed ${MODULE_PATH}@${VERSION}"
+              exit 0
+            fi
+            echo "Attempt ${attempt} failed; retrying in 30s..."
+            sleep 30
+          done
+          echo "::error::proxy.golang.org could not fetch ${MODULE_PATH}@${VERSION}. If the repo is private, the proxy cannot index it (consumers would need GOPRIVATE)."
+          exit 1
+
+      - name: Summary
+        if: success()
+        run: |
+          VERSION="${GITHUB_REF_NAME#go/}"
+          {
+            echo "## Published ${MODULE_PATH}@${VERSION}"
+            echo ""
+            echo "- Install: \`go get ${MODULE_PATH}@${VERSION}\`"
+            echo "- Docs: https://pkg.go.dev/${MODULE_PATH}@${VERSION}"
+            echo "- Distribution: git tag + proxy.golang.org (no registry upload)"
+          } >> "$GITHUB_STEP_SUMMARY"
