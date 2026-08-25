@@ -210,13 +210,12 @@ func signArcusQuote(quote *ArcusFirmQuote, signer TypedDataSigner, taker common.
 		return nil, err
 	}
 	return &ArcusSignedQuote{
-		Venue:       VenueArcus,
-		ChainID:     chainID,
-		Taker:       taker,
-		TypedData:   quote.ToSign,
-		Signature:   signature,
-		FeePolicyID: quote.Arcus.FeePolicyID,
-		Permits:     options.Permits,
+		Venue:     VenueArcus,
+		ChainID:   chainID,
+		Taker:     taker,
+		TypedData: quote.ToSign,
+		Signature: signature,
+		Permits:   options.Permits,
 	}, nil
 }
 

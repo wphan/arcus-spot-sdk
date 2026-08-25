@@ -238,9 +238,6 @@ type ArcusFirmQuote struct {
 		// MinAmountOut is the signed delivery floor. Net of buy-token fees;
 		// unchanged when the fee is taken from the sell token.
 		MinAmountOut string `json:"minAmountOut"`
-		// FeePolicyID is the fee schedule hash from /quote. Echo on /submit
-		// when fees apply.
-		FeePolicyID string `json:"feePolicyId,omitempty"`
 	} `json:"arcus"`
 }
 
@@ -433,9 +430,6 @@ type ArcusSignedQuote struct {
 	Taker     common.Address  `json:"taker"`
 	TypedData Eip712TypedData `json:"typedData"`
 	Signature hexutil.Bytes   `json:"signature"`
-	// FeePolicyID is copied from the quote. Required on /submit when the
-	// quote carries fees.
-	FeePolicyID string `json:"feePolicyId,omitempty"`
 	// Permits optionally carries an EIP-2612 permit for a first-time
 	// sellToken→Permit2 allowance.
 	Permits []Permit `json:"permits,omitempty"`

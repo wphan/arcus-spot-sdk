@@ -157,9 +157,7 @@ gas-costing tx. The rialto and lifi builders (`BuildRialtoSellTokenPermitIfNeede
 requires `Options.Owner` because its witness does not carry the taker.
 
 Arcus `BuyAmount` and `Arcus.MinAmountOut` are already net of protocol and
-builder fees — do not subtract `Fees` again. `SignQuote` copies
-`Arcus.FeePolicyID` onto the submit body; fee-bearing Arcus submits fail with
-`409 FEE_POLICY_CHANGED` when that id is missing or stale.
+builder fees — do not subtract `Fees` again.
 
 ### Chain deployments and token list
 
