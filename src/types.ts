@@ -58,6 +58,8 @@ export type RouteFee = {
   token: Hex;
   type: string;
   amountUsd?: number;
+  /** Human basis points when the venue reports them (may be tenths, e.g. 3.5). */
+  bps?: number;
 };
 
 export type BebopJamOrder = {
@@ -170,13 +172,20 @@ export type TakerIntentPermit2TypedData = Eip712TypedData & {
 
 export type ArcusFirmQuote = {
   venue: "arcus";
+  /** Post-fee (net) amount the taker keeps. Do not subtract `fees` again. */
   buyAmount: string;
   sellAmount: string;
   fees: RouteFee[];
   expiry: number;
   toSign: TakerIntentPermit2TypedData;
   arcus: {
+    /**
+     * Signed delivery floor. Net of buy-token fees; unchanged when the fee is
+     * taken from the sell token.
+     */
     minAmountOut: string;
+    /** Fee schedule hash from /quote. Echo on /submit when fees apply. */
+    feePolicyId?: Hex;
   };
 };
 
@@ -286,6 +295,8 @@ export type ArcusSignedQuote = {
   taker: Hex;
   typedData: TakerIntentPermit2TypedData;
   signature: Hex;
+  /** Fee policy from the quote. Required on /submit when the quote carries fees. */
+  feePolicyId?: Hex;
   /** Optional EIP-2612 permit for a first-time sellToken→Permit2 allowance. */
   permits?: Permit[];
   /** Optional discriminator surfaced as bytes32 in the SwapShell event. */

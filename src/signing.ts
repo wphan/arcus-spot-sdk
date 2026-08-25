@@ -107,6 +107,7 @@ async function signArcusQuote(
     taker,
     typedData: quote.toSign,
     signature,
+    ...(quote.arcus.feePolicyId ? { feePolicyId: quote.arcus.feePolicyId } : {}),
     ...(permits ? { permits } : {}),
   };
 }
