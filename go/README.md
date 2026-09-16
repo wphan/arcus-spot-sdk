@@ -3,8 +3,8 @@
 Go SDK for the Arcus spot router server. A direct port of the TypeScript SDK
 ([`@arcus-xyz/arcus-spot-sdk`](../README.md)): it wraps the router HTTP API and
 provides a go-ethereum-based signing flow for firm quotes routed through
-SwapShell — **Arcus RFQ**, **Rialto**, and **LI.FI** venues on Robinhood mainnet
-(4663) and testnet (46630).
+SwapShell — **Arcus RFQ**, **Rialto**, **LI.FI**, and **0x Gasless** venues on
+Robinhood mainnet (4663) and testnet (46630).
 
 `github.com/ethereum/go-ethereum` is the only dependency.
 
@@ -60,6 +60,7 @@ func main() {
 
 	client, err := arcusspot.NewSpotRouterClient(arcusspot.ClientOptions{
 		BaseURL: "https://router.spot.testnet.arcus.xyz/v1",
+		// APIKey: "arc_…", // optional; sent as X-Api-Key
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -160,7 +161,7 @@ requires `Options.Owner` because its witness does not carry the taker.
 
 ```go
 deployments, ok := arcusspot.GetChainDeployments(arcusspot.RobinhoodTestnetChainID)
-// deployments.SwapShell, .ArcusSettlement,
+// deployments.SwapShell, .ArcusSettlement, .ArcusRfqExecutor,
 // .ArcusWrappedTokenFactory, .ArcusWrappedTokenBeacon, ...
 
 swapShell, ok := arcusspot.GetSwapShellAddress(46630)
