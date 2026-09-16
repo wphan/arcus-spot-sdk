@@ -269,16 +269,16 @@ type ZeroxGaslessApproval struct {
 
 // ZeroxFirmQuote is a firm quote from the 0x gasless venue.
 type ZeroxFirmQuote struct {
-	Venue        Venue                      `json:"venue"` // always "zerox"
-	Details      QuoteDetails               `json:"details"`
-	BuyAmount    string                     `json:"buyAmount"`
-	SellAmount   string                     `json:"sellAmount"`
-	MinBuyAmount string                     `json:"minBuyAmount,omitempty"`
-	Fees         []RouteFee                 `json:"fees"`
-	ToSign       *Eip712TypedData           `json:"toSign,omitempty"`
+	Venue        Venue                        `json:"venue"` // always "zerox"
+	Details      QuoteDetails                 `json:"details"`
+	BuyAmount    string                       `json:"buyAmount"`
+	SellAmount   string                       `json:"sellAmount"`
+	MinBuyAmount string                       `json:"minBuyAmount,omitempty"`
+	Fees         []RouteFee                   `json:"fees"`
+	ToSign       *Eip712TypedData             `json:"toSign,omitempty"`
 	Trade        *ZeroxSettlerMetaTransaction `json:"trade,omitempty"`
-	Approval     *ZeroxGaslessApproval      `json:"approval,omitempty"`
-	Raw          json.RawMessage            `json:"raw"`
+	Approval     *ZeroxGaslessApproval        `json:"approval,omitempty"`
+	Raw          json.RawMessage              `json:"raw"`
 }
 
 // FirmQuoteVenue implements FirmQuote.

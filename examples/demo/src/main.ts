@@ -159,7 +159,6 @@ app.innerHTML = `
             <div class="field">
               <label for="apiKey">API key (optional)</label>
               <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="arc_…" />
-              <p class="note">Sent as X-Api-Key on every request. Leave empty to call without a key.</p>
             </div>
             <div class="pair">
               <div class="field">

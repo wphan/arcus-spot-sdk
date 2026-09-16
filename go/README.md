@@ -60,7 +60,6 @@ func main() {
 
 	client, err := arcusspot.NewSpotRouterClient(arcusspot.ClientOptions{
 		BaseURL: "https://router.spot.testnet.arcus.xyz/v1",
-		// APIKey: "arc_…", // optional; sent as X-Api-Key
 	})
 	if err != nil {
 		log.Fatal(err)

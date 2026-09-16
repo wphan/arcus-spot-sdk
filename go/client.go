@@ -26,8 +26,7 @@ type ClientOptions struct {
 	HTTPClient *http.Client
 	// Timeout bounds each request; defaults to DefaultTimeout.
 	Timeout time.Duration
-	// APIKey is sent as X-Api-Key on every request. Omit it against a router
-	// that is not enforcing keys.
+	// APIKey is sent as X-Api-Key on every request.
 	APIKey string
 }
 
